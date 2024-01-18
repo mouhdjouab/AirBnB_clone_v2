@@ -15,22 +15,16 @@ class BaseModel():
     updated_at=Column(DateTime, nullable=True, default=datetime.utcnow())
     def __init__(self, *args, **kwargs):
         """Instatntiates a new model"""
-        if not kwargs:
-            self.id = str(uuid.uuid4())
-            self.created_at = datetime.now()
-            self.updated_at = datetime.now()
-
-        else:
+        self.id = str(uuid.uuid4())
+        self.created_at = datetime.utcnow()
+        self.updated_at = datetime.utcnow()
+        if kwargs:
             for key, value in kwargs.items():
-                if key=='updated_at' or key =='created_at':
-
-                    kwargs['updated_at'] = datetime.strptime(kwargs['updated_at'],
-                                                     '%Y-%m-%dT%H:%M:%S.%f')
-                    kwargs['created_at'] = datetime.strptime(kwargs['created_at'],
-                                                     '%Y-%m-%dT%H:%M:%S.%f')
-                if hasattr(self,key):
-                    setattr(self, key, value)
-
+                if key == "created_at" or key == "updated_at":
+                    value = datetime.strptime(value, '%Y-%m-%dT%H:%M:%S.%f')
+                if hasattr(self, key):
+                    if key != "__class__":
+                        setattr(self, key, value)
             #del kwargs['__class__']
             #self.__dict__.update(kwargs)
 
