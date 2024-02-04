@@ -1,15 +1,8 @@
 #!/usr/bin/env bash
 #Install Nginx if it not already installed
-function install() {
-        command -v "$1" &> /dev/null
-        if [ $? -eq 0 ];then
-                sudo apt-get update -y -qq && \
-                        sudo apt-get install "$1" -y -qq
-        else
-                echo -e " Nginx is instaled before"
-        fi
-}
-install nginx
+
+apt-get update
+apt-get -y install nginx
 sudo mkdir -p /data/web_static/releases/test
 sudo mkdir -p /data/web_static/shared
 touch /data/web_static/releases/test/index.html

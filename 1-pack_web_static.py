@@ -2,7 +2,7 @@
 # Fabfile to generates a .tgz archive from the contents of web_static.
 import os
 from datetime import datetime
-from fabric.api import local
+from fabric.api import *
 
 
 def do_pack():
