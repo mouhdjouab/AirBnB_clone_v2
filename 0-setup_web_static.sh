@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 #Install Nginx if it not already installed
 function install() {
         command -v "$1" &> /dev/null
