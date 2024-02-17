@@ -73,8 +73,8 @@ class HBNBCommand(cmd.Cmd):
                 pline = pline[2].strip()  # pline is now str
                 if pline:
                     # check for *args or **kwargs
-                    if pline[0] == '{' and pline[-1] =='}'\
-                            and type(eval(pline)) == dict:
+                    if pline[0] == '{' and pline[-1] == '}'\
+                            and type(eval(pline)) is dict:
                         _args = pline
                     else:
                         _args = pline.replace(',', '')
@@ -113,48 +113,31 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
-    def do_create(self, arg):
-        """
-        Create instance of BaseModel and save it
-        Usage: create <class_name>
-        """
+    def do_create(self, args):
+        """ Create an object of any class"""
         try:
-            class_nom = arg.split(" ")[0]
-        except IndexError:
-            pass
-
-        if len(class_nom) == 0:
+            if not args:
+                raise SyntaxError()
+            arg_list = args.split(" ")
+            kw = {}
+            for arg in arg_list[1:]:
+                arg_splited = arg.split("=")
+                arg_splited[1] = eval(arg_splited[1])
+                if type(arg_splited[1]) is str:
+                    arg_splited[1] = arg_splited[1].replace("_", " ").replace('"', '\\"')
+                kw[arg_splited[0]] = arg_splited[1]
+        except SyntaxError:
             print("** class name missing **")
-            return
-        elif class_nom  not in HBNBCommand.classes:
+        except NameError:
             print("** class doesn't exist **")
-            return
-
-
-
-        command = arg.split(" ")
-        new_instance=eval(class_nom)()
-        for i in range(1, len(command)):
-
-            key = command[i].split("=")[0]
-            value = command[i].split("=")[1]
-
-            if value.startswith('"'):
-                value = value.strip('"').replace("_", " ")
-            else:
-                try:
-                    value = eval(value)
-                except Exception:
-                    print(f"coldnt do eval{value}")
-                    pass
-
-            if hasattr(new_instance, key):
-                setattr(new_instance, key, value)
-
-        storage.new(new_instance)
-        print(new_instance.id)
+        new_instance = HBNBCommand.classes[arg_list[0]](**kw)
         new_instance.save()
+        print(new_instance.id)
 
+    def help_create(self):
+        """ Help information for the create method """
+        print("Creates a class of any type")
+        print("[Usage]: create <className>\n")
 
     def do_show(self, args):
         """ Method to show an individual object """
@@ -231,13 +214,11 @@ class HBNBCommand(cmd.Cmd):
             if args not in HBNBCommand.classes:
                 print("** class doesn't exist **")
                 return
-            for k, v in storage._FileStorage__objects.items():
-                if k.split('.')[0] == args:
-                    print_list.append(str(v))
-        else:
-            for k, v in storage._FileStorage__objects.items():
+            for k, v in storage.all(HBNBCommand.classes[args]).items():
                 print_list.append(str(v))
-
+        else:
+            for k, v in storage.all().items():
+                print_list.append(str(v))
         print(print_list)
 
     def help_all(self):
