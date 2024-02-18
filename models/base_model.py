@@ -49,8 +49,10 @@ class BaseModel:
         Return:
             returns a string of class name, id, and dictionary
         """
+        d = self.__dict__.copy()
+        d.pop("_sa_instance_state", None)
         return "[{}] ({}) {}".format(
-            type(self).__name__, self.id, self.__dict__)
+            type(self).__name__, self.id, d)
 
     def __repr__(self):
         """return a string representaion
@@ -73,10 +75,8 @@ class BaseModel:
         my_dict["__class__"] = str(type(self).__name__)
         my_dict["created_at"] = self.created_at.isoformat()
         my_dict["updated_at"] = self.updated_at.isoformat()
-        if '_sa_instance_state' in my_dict.keys():
-            del my_dict['_sa_instance_state']
+        my_dict.pop("_sa_instance_state", None)
         return my_dict
-
     def delete(self):
         """ delete object
         """
