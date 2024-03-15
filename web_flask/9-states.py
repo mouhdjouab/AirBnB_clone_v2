@@ -1,41 +1,48 @@
 #!/usr/bin/python3
-"""Flask web application.
-
-listens on 0.0.0.0, port 5000.
-Routes:
-    /states: HTML page all State
-    /states/<id>: HTML display state with <id>.
-"""
+""" Starts a Flash Web Application """
 from models import storage
-from flask import Flask
-from flask import render_template
-
+from models.state import State
+from os import environ
+from flask import Flask, render_template
 app = Flask(__name__)
-
-
-@app.route("/states", strict_slashes=False)
-def states_all():
-    """HTML page with all States.
-
-    """
-    states = storage.all("State")
-    return render_template("9-states.html", state=states)
-
-
-@app.route("/states/<id>", strict_slashes=False)
-def states_id(id):
-    """ HTML page with  <id>, ."""
-    for state in storage.all("State").values():
-        if state.id == id:
-            return render_template("9-states.html", state=state)
-    return render_template("9-states.html")
+# app.jinja_env.trim_blocks = True
+# app.jinja_env.lstrip_blocks = True
 
 
 @app.teardown_appcontext
-def teardown(exc):
-    """Remove  current SQLAlchemy session."""
+def close_db(error):
+    """ Remove the current SQLAlchemy Session """
     storage.close()
 
 
+@app.route('/states', strict_slashes=False)
+@app.route('/states/<id>', strict_slashes=False)
+def states_state(id=""):
+    """ displays a HTML page with a list of cities by states """
+    states = storage.all(State).values()
+    states = sorted(states, key=lambda k: k.name)
+    found = 0
+    state = ""
+    cities = []
+
+    for i in states:
+        if id == i.id:
+            state = i
+            found = 1
+            break
+    if found:
+        states = sorted(state.cities, key=lambda k: k.name)
+        state = state.name
+
+    if id and not found:
+        found = 2
+
+    return render_template('9-states.html',
+                           state=state,
+                           array=states,
+                           found=found)
+
+
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port='5000')
+    """ Main Function """
+    app.run(host='0.0.0.0', port=5000)
